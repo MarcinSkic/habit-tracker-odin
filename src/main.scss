@@ -75,7 +75,7 @@
         position: relative;
     }
 
-    #create-habit {
+    #pick-habit {
         .dialog-content {
             width: 100%;
 
@@ -87,7 +87,7 @@
             background-color: transparent;
         }
 
-        .pick-habit-type {
+        .habit-type {
             background-color: rgba(0, 0, 0, 0.849);
             color: white;
 
@@ -121,7 +121,7 @@
             }
         }
 
-        .pick-habit-type:first-child {
+        .habit-type:first-child {
             border-radius: 10px 10px 0 0;
         }
     }

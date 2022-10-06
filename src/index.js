@@ -12,7 +12,7 @@ const DOMController = (function(){
     }
 
     function createHabitCreatorDialog(){
-        const dialogContainer = document.getElementById("create-habit");
+        const dialogContainer = document.getElementById("pick-habit");
         /*dialogContainer.innerHTML = ``*/
         
         const dialog = new A11yDialog(dialogContainer);
