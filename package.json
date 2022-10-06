@@ -19,11 +19,16 @@
   },
   "homepage": "https://github.com/MarcinSkic/habit-tracker-odin#readme",
   "devDependencies": {
+    "css-loader": "^6.7.1",
     "html-webpack-plugin": "^5.5.0",
+    "sass-loader": "^13.0.2",
+    "style-loader": "^3.3.1",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "normalize.css": "^8.0.1"
+    "a11y-dialog": "^7.5.2",
+    "normalize.css": "^8.0.1",
+    "sass": "^1.55.0"
   }
 }

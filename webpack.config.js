@@ -10,7 +10,14 @@ module.exports = {
     devtool: 'inline-source-map',
     module: {
         rules: [
-
+            {
+                test: /\.s[ac]ss/i,
+                use: ['style-loader','css-loader','sass-loader'],
+            },
+            {
+                test: /\.css$/i,
+                use: ['style-loader','css-loader'],
+            }
         ],
     },
     plugins:[
@@ -24,7 +31,7 @@ module.exports = {
             title: "Habit Tracker|Raports",
             filename: "pages/raports.html",
             template: "./src/pages/raports/site.html",
-            chunks: ['raports'],
+            chunks: ['index','raports'],
         })
     ],
     output: {
