@@ -7,6 +7,24 @@
     <title>Habit Tracker|Home</title>
 <script defer src="index.bundle.js"></script></head>
 <body>
-    
+    <div 
+        class="dialog-container"
+        id="create-habit"
+        aria-hidden="true"
+    >
+        <div class="dialog-overlay" data-a11y-dialog-hide></div>
+        <div class="dialog-content" role="document">
+          <button 
+          type="button" 
+          class="dialog-close"
+          data-a11y-dialog-hide 
+          aria-label="Close this dialog window">
+            &times;
+          </button>
+          <h1 id="your-dialog-title-id">Your dialog title</h1>
+        </div>
+    </div>
+    <header>
+    </header>
 </body>
 </html>
