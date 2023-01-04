@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "a11y-dialog": "^7.5.2",
+    "date-fns": "^2.29.3",
     "normalize.css": "^8.0.1",
     "sass": "^1.55.0"
   }

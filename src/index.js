@@ -2,6 +2,29 @@ import A11yDialog from "a11y-dialog";
 import "normalize.css";
 import "./main.scss";
 
+function baseHabitFactory(formData){
+
+    const DOMdata = {
+        type: formData.get('type'),
+        title: formData.get('title'),
+        description: formData.get('description'),
+        color: formData.get('color'),
+        frequency: formData.get('frequency'),
+        startShowHour: formData.get('startShowHour'),
+        endShowHour: formData.get('endShowHour')
+    }
+
+    const markedDays = {};
+
+    return {DOMdata,markedDays};
+}
+
+const Model = (function() {
+    const habits = [];
+
+    return {habits}
+})();
+
 const DOMController = (function(){
     function htmlToElements(html) {
         var template = document.createElement('template');
@@ -32,13 +55,14 @@ const DOMController = (function(){
         dialog.on('show',generateHabitDialog);
     }
 
-    function testFormData(event){
-        let formData = new FormData(this);
-        const entries = [...formData.entries()];
-        console.log(entries[0]);
-        console.log(...formData.values());
-        console.log(typeof([...formData.entries()]));
+    function onHabitFormSubmit(event){
         event.preventDefault();
+        
+        let formData = new FormData(this);
+
+        const habit = baseHabitFactory(formData);
+        Model.habits.push(habit);
+        generateTodayDialogs();
     }
 
     const habitGenerator = (function(){
@@ -85,7 +109,7 @@ const DOMController = (function(){
                 <input type="submit" name="submit" value="test">
             `
 
-            form.addEventListener('submit',testFormData);
+            form.addEventListener('submit',onHabitFormSubmit);
             dialogContent.append(form);
         }
 
@@ -118,13 +142,29 @@ const DOMController = (function(){
         return {generateDialogContent};
     })();
 
+    function generateTodayDialogs(){
+        const container = document.querySelector(".habitsList");
+        //container.innerHTML = "";
+
+        for(let habit in Model.habits){
+            const habitDiv = document.createElement('div');
+
+            habitDiv.innerHTML = `
+                <div>Lool</div>
+            `
+
+            container.append(habitDiv);
+        }
+    }
+
     function generateHabitDialog(dialogElement, event){
         habitGenerator.generateDialogContent(event.currentTarget.value);
     }
 
-    return {generateMobileHeader,createHabitCreatorDialog,habitPickerDialog: createHabitPickerDialog};
+    return {generateMobileHeader,generateTodayDialogs,createHabitCreatorDialog,createHabitPickerDialog};
 })();
 
 DOMController.generateMobileHeader();
-DOMController.habitPickerDialog();
+DOMController.createHabitPickerDialog();
 DOMController.createHabitCreatorDialog();
+DOMController.generateTodayDialogs();
