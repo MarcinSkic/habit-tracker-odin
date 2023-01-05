@@ -1,7 +1,10 @@
 import A11yDialog from "a11y-dialog";
 import "normalize.css";
 import "./main.scss";
-import {format} from "date-fns";
+import {parse,format,isToday,isBefore,subDays} from "date-fns";
+
+const DATE_AS_KEY_FORMAT = "yyyyMMdd";
+const DAYS_TO_SHOW = 7;
 
 function baseHabitFactory(formData){
 
@@ -25,9 +28,9 @@ const habitsController = (function(){
         const habit = Model.habits[event.target.parentElement.dataset.index];
         
         if(event.target.checked){
-            habit.markedDays[format(new Date(),"yyyyMMdd")] = true;
+            habit.markedDays[format(new Date(),DATE_AS_KEY_FORMAT)] = true;
         } else {
-            delete habit.markedDays[format(new Date(),"yyyyMMdd")];
+            delete habit.markedDays[format(new Date(),DATE_AS_KEY_FORMAT)];
         }
 
         Model.saveToLocalStorage();
@@ -42,6 +45,9 @@ const Model = (function() {
     const HABITS_KEY = "HABITS"
 
     let habits;
+    let currentDate = parse(format(new Date(),DATE_AS_KEY_FORMAT),DATE_AS_KEY_FORMAT,new Date());
+
+    console.log(currentDate);
 
     if(localStorage.getItem(HABITS_KEY)){
         habits = JSON.parse(localStorage.getItem(HABITS_KEY));
@@ -54,7 +60,7 @@ const Model = (function() {
         localStorage.setItem(HABITS_KEY,JSON.stringify(habits));
     }
 
-    return {habits,saveToLocalStorage};
+    return {habits,currentDate,saveToLocalStorage};
 })();
 
 const DOMController = (function(){
@@ -100,9 +106,38 @@ const DOMController = (function(){
     }
 
     function generateTodayPage(){
+        
         const header = document.querySelector('.today-page > header');
-        header.textContent = `Today is ${format(new Date(),"yyyy.MM.dd")}`;
 
+        if(isToday(Model.currentDate)){
+            header.innerHTML = `<h1>Today</h1>`;
+        } else {
+            header.innerHTML = `<h1>${format(Model.currentDate,"yyyy.MM.dd")}</h1>`;
+        }
+
+        const daysList = document.createElement('div');
+        daysList.classList.add("days-list");
+
+        /*for(let day = Model.currentDate; isBefore(subDays(Model.currentDate,7),day); subDays(day,1)){
+            console.log(day);
+        }*/
+
+        for(let i = 0; i < DAYS_TO_SHOW; i++){
+            const day = subDays(Model.currentDate,i);
+
+            const dayDiv = document.createElement('div');
+            dayDiv.classList.add("day");
+            dayDiv.dataset.date = format(day,DATE_AS_KEY_FORMAT);
+
+            dayDiv.innerHTML = `
+            <div>${format(day,"eee")}</div>
+            <div>${format(day,"d")}</div>
+            `
+
+            daysList.append(dayDiv);
+        }
+        
+        header.append(daysList);
         generateTodayHabits();
     }
 
@@ -127,7 +162,7 @@ const DOMController = (function(){
                 const checkbox = habitDiv.querySelector('input[type="checkbox"]');
 
                 checkbox.addEventListener('click',habitsController.changeHabitState);
-                checkbox.checked = habit.markedDays[format(new Date(),"yyyyMMdd")];
+                checkbox.checked = habit.markedDays[format(new Date(),DATE_AS_KEY_FORMAT)];
                 container.append(habitDiv);
             }
             
