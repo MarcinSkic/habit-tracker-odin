@@ -1,6 +1,7 @@
 import A11yDialog from "a11y-dialog";
 import "normalize.css";
 import "./main.scss";
+import {format} from "date-fns";
 
 function baseHabitFactory(formData){
 
@@ -19,10 +20,41 @@ function baseHabitFactory(formData){
     return {DOMdata,markedDays};
 }
 
-const Model = (function() {
-    const habits = [];
+const habitsController = (function(){
+    function changeHabitState(event){
+        const habit = Model.habits[event.target.parentElement.dataset.index];
+        
+        if(event.target.checked){
+            habit.markedDays[format(new Date(),"yyyyMMdd")] = true;
+        } else {
+            delete habit.markedDays[format(new Date(),"yyyyMMdd")];
+        }
 
-    return {habits}
+        Model.saveToLocalStorage();
+        console.log(habit.markedDays);
+    }
+
+    return {changeHabitState};
+})();
+
+const Model = (function() {
+
+    const HABITS_KEY = "HABITS"
+
+    let habits;
+
+    if(localStorage.getItem(HABITS_KEY)){
+        habits = JSON.parse(localStorage.getItem(HABITS_KEY));
+    } else {
+        habits = [];
+    }
+    console.log("readFromStorage =",habits);
+
+    function saveToLocalStorage(){
+        localStorage.setItem(HABITS_KEY,JSON.stringify(habits));
+    }
+
+    return {habits,saveToLocalStorage};
 })();
 
 const DOMController = (function(){
@@ -33,7 +65,7 @@ const DOMController = (function(){
     }
 
     function generateMobileHeader(){
-        const header = document.querySelector('header');
+        const header = document.querySelector('nav');
 
         header.innerHTML = `<a href="/dist/index.html"><button class="today">Today</button></a>
         <button class="add-habit" data-a11y-dialog-show="pick-habit">+</button>
@@ -62,7 +94,45 @@ const DOMController = (function(){
 
         const habit = baseHabitFactory(formData);
         Model.habits.push(habit);
-        generateTodayDialogs();
+        Model.saveToLocalStorage();
+
+        generateTodayHabits();
+    }
+
+    function generateTodayPage(){
+        const header = document.querySelector('.today-page > header');
+        header.textContent = `Today is ${format(new Date(),"yyyy.MM.dd")}`;
+
+        generateTodayHabits();
+    }
+
+    function generateTodayHabits(){
+        const container = document.querySelector(".habitsList");
+        container.innerHTML = "";
+        let index = 0;
+
+        console.log("generatePage =",Model.habits);
+        Model.habits.forEach(habit => {
+
+            if(true){
+                const habitDiv = document.createElement('div');
+                habitDiv.classList.add("habit");
+                habitDiv.dataset.index = index;
+    
+                habitDiv.innerHTML = `
+                <div class="title" style="color:${habit.DOMdata.color};">${habit.DOMdata.title}</div>
+                <input type="checkbox" name="marked">
+                `
+    
+                const checkbox = habitDiv.querySelector('input[type="checkbox"]');
+
+                checkbox.addEventListener('click',habitsController.changeHabitState);
+                checkbox.checked = habit.markedDays[format(new Date(),"yyyyMMdd")];
+                container.append(habitDiv);
+            }
+            
+            index++;
+        });
     }
 
     const habitGenerator = (function(){
@@ -142,29 +212,14 @@ const DOMController = (function(){
         return {generateDialogContent};
     })();
 
-    function generateTodayDialogs(){
-        const container = document.querySelector(".habitsList");
-        //container.innerHTML = "";
-
-        for(let habit in Model.habits){
-            const habitDiv = document.createElement('div');
-
-            habitDiv.innerHTML = `
-                <div>Lool</div>
-            `
-
-            container.append(habitDiv);
-        }
-    }
-
     function generateHabitDialog(dialogElement, event){
         habitGenerator.generateDialogContent(event.currentTarget.value);
     }
 
-    return {generateMobileHeader,generateTodayDialogs,createHabitCreatorDialog,createHabitPickerDialog};
+    return {generateMobileHeader,generateTodayPage,generateTodayHabits,createHabitCreatorDialog,createHabitPickerDialog};
 })();
 
 DOMController.generateMobileHeader();
 DOMController.createHabitPickerDialog();
 DOMController.createHabitCreatorDialog();
-DOMController.generateTodayDialogs();
+DOMController.generateTodayPage();

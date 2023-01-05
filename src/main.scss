@@ -7,130 +7,132 @@
     place-items: center;
 }
 
-@media only screen and (max-width: 425px) {
-    body {
-        width: 100vw;
-        height: 100vh;
+body {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+nav {
+    position: absolute;
+    bottom: 0;
+
+    width: 80%;
+
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+
+    a {
+        flex: 1;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .add-habit {
+        flex: 0 0 50px;
+
+        height: 50px;
+
+        font-size: 2.5rem;
+    }
+}
+
+.dialog-container {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.dialog-container[aria-hidden='true'] {
+    display: none;
+}
+
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(43, 46, 56, 0.692);
+}
+
+.dialog-content {
+    background-color: rgb(255, 255, 255);
+    z-index: 2;
+    position: relative;
+}
+
+#pick-habit {
+
+    .dialog-content {
+        width: 100%;
 
         display: flex;
         flex-direction: column;
-        align-items: center;
+
+        align-self: flex-end;
+        border-radius: 10px 10px 0 0;
+        background-color: transparent;
     }
 
-    header {
-        position: absolute;
-        bottom: 0;
+    .habit-type {
+        background-color: rgba(0, 0, 0, 0.849);
+        color: white;
 
-        width: 80%;
+        border: none;
+        margin: 0;
+        padding: 0;
 
-        display: flex;
-        align-items: flex-end;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: 40px 1fr 40px;
+        grid-template-rows: repeat(2,40px);
+        grid-template-areas: 
+        "icon title leading-arrow"
+        "icon description leading-arrow";
+        gap: 0 10px;
+        place-items: center;
 
-        a {
-            flex: 1;
-
-            button {
-                width: 100%;
-            }
+        .icon {
+            grid-area: icon;
+            color: aquamarine;
         }
 
-        .add-habit {
-            flex: 0 0 50px;
+        .title {
+            grid-area: title;
+            justify-self: start;
+        }
 
-            height: 50px;
+        .leading-arrow {
+            grid-area: leading-arrow;
+            align-self: stretch;
+        }
 
-            font-size: 2.5rem;
+        .description {
+            grid-area: description;
+            justify-self: start;
         }
     }
 
-    .dialog-container {
-        position: fixed;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 2;
+    .habit-type:first-child {
+        border-radius: 10px 10px 0 0;
     }
+}
 
-    .dialog-container[aria-hidden='true'] {
-        display: none;
-    }
-
-    .dialog-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background-color: rgba(43, 46, 56, 0.692);
-    }
-
-    .dialog-content {
-        background-color: rgb(255, 255, 255);
-        z-index: 2;
-        position: relative;
-    }
-
-    #pick-habit {
-
-        .dialog-content {
-            width: 100%;
-
-            display: flex;
-            flex-direction: column;
-
-            align-self: flex-end;
-            border-radius: 10px 10px 0 0;
-            background-color: transparent;
-        }
-
-        .habit-type {
-            background-color: rgba(0, 0, 0, 0.849);
-            color: white;
-
-            border: none;
-            margin: 0;
-            padding: 0;
-
-            display: grid;
-            grid-template-columns: 40px 1fr 40px;
-            grid-template-rows: repeat(2,40px);
-            grid-template-areas: 
-            "icon title leading-arrow"
-            "icon description leading-arrow";
-            gap: 0 10px;
-            place-items: center;
-
-            .icon {
-                grid-area: icon;
-                color: aquamarine;
-            }
-
-            .title {
-                grid-area: title;
-                justify-self: start;
-            }
-
-            .leading-arrow {
-                grid-area: leading-arrow;
-                align-self: stretch;
-            }
-
-            .description {
-                grid-area: description;
-                justify-self: start;
-            }
-        }
-
-        .habit-type:first-child {
-            border-radius: 10px 10px 0 0;
-        }
-    }
+@media only screen and (max-width: 425px) {
+    
 }
 
 
