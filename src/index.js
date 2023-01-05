@@ -1,7 +1,7 @@
 import A11yDialog from "a11y-dialog";
 import "normalize.css";
 import "./main.scss";
-import {parse,format,isToday,isBefore,subDays} from "date-fns";
+import {parse,format,isToday,addDays,subDays} from "date-fns";
 
 const DATE_AS_KEY_FORMAT = "yyyyMMdd";
 const DAYS_TO_SHOW = 7;
@@ -45,9 +45,9 @@ const Model = (function() {
     const HABITS_KEY = "HABITS"
 
     let habits;
-    let currentDate = parse(format(new Date(),DATE_AS_KEY_FORMAT),DATE_AS_KEY_FORMAT,new Date());
+    let selectedDate = parse(format(new Date(),DATE_AS_KEY_FORMAT),DATE_AS_KEY_FORMAT,new Date());
 
-    console.log(currentDate);
+    console.log(selectedDate);
 
     if(localStorage.getItem(HABITS_KEY)){
         habits = JSON.parse(localStorage.getItem(HABITS_KEY));
@@ -60,7 +60,7 @@ const Model = (function() {
         localStorage.setItem(HABITS_KEY,JSON.stringify(habits));
     }
 
-    return {habits,currentDate,saveToLocalStorage};
+    return {habits,selectedDate,saveToLocalStorage};
 })();
 
 const DOMController = (function(){
@@ -106,24 +106,44 @@ const DOMController = (function(){
     }
 
     function generateTodayPage(){
-        
+
+        setSelectedDate();
+        generateDaysList();
+        generateTodayHabits();
+    }
+
+    function setSelectedDate(){
+
         const header = document.querySelector('.today-page > header');
 
-        if(isToday(Model.currentDate)){
-            header.innerHTML = `<h1>Today</h1>`;
-        } else {
-            header.innerHTML = `<h1>${format(Model.currentDate,"yyyy.MM.dd")}</h1>`;
+        let h1 = header.querySelector('h1');
+
+        if(!h1){
+            h1 = document.createElement("h1");
+            header.append(h1);
         }
 
-        const daysList = document.createElement('div');
-        daysList.classList.add("days-list");
+        if(isToday(Model.selectedDate)){
+            h1.textContent = `Today`;
+        } else {
+            h1.textContent = `${format(Model.selectedDate,"yyyy.MM.dd")}`;
+        }
+    }
 
-        /*for(let day = Model.currentDate; isBefore(subDays(Model.currentDate,7),day); subDays(day,1)){
-            console.log(day);
-        }*/
+    function generateDaysList(){
+        const header = document.querySelector('.today-page > header');
+        let daysList = header.querySelector(".days-list");
+
+        if(!daysList){
+            daysList = document.createElement('div');
+            daysList.classList.add("days-list");
+            header.append(daysList);
+        } else {
+            daysList.innerHTML = "";
+        }
 
         for(let i = 0; i < DAYS_TO_SHOW; i++){
-            const day = subDays(Model.currentDate,i);
+            const day = addDays(subDays(Model.selectedDate,DAYS_TO_SHOW-1),i);
 
             const dayDiv = document.createElement('div');
             dayDiv.classList.add("day");
@@ -134,11 +154,10 @@ const DOMController = (function(){
             <div>${format(day,"d")}</div>
             `
 
+            dayDiv.addEventListener('click',onSelectDate);
+
             daysList.append(dayDiv);
         }
-        
-        header.append(daysList);
-        generateTodayHabits();
     }
 
     function generateTodayHabits(){
@@ -168,6 +187,18 @@ const DOMController = (function(){
             
             index++;
         });
+    }
+
+    function onSelectDate(event){
+        const previousSelection = document.querySelector(`.days-list [data-date="${format(Model.selectedDate,DATE_AS_KEY_FORMAT)}"]`);
+        previousSelection.classList.remove('selected');
+
+        Model.selectedDate = parse(event.currentTarget.dataset.date,DATE_AS_KEY_FORMAT,new Date());
+        const currentSelection = document.querySelector(`.days-list [data-date="${format(Model.selectedDate,DATE_AS_KEY_FORMAT)}"]`);
+        currentSelection.classList.add('selected');
+
+        console.log(Model.selectedDate);
+        setSelectedDate();
     }
 
     const habitGenerator = (function(){
@@ -251,10 +282,18 @@ const DOMController = (function(){
         habitGenerator.generateDialogContent(event.currentTarget.value);
     }
 
-    return {generateMobileHeader,generateTodayPage,generateTodayHabits,createHabitCreatorDialog,createHabitPickerDialog};
+    return {generateMobileHeader,
+        generateTodayPage,
+        generateTodayHabits,
+        createHabitCreatorDialog,
+        createHabitPickerDialog,
+        onSelectDate
+    };
 })();
 
 DOMController.generateMobileHeader();
 DOMController.createHabitPickerDialog();
 DOMController.createHabitCreatorDialog();
 DOMController.generateTodayPage();
+
+DOMController.onSelectDate({currentTarget: {dataset: {date: format(Model.selectedDate,DATE_AS_KEY_FORMAT)}}})
