@@ -24,13 +24,11 @@ function baseHabitFactory(formData){
 }
 
 const habitsController = (function(){
-    function changeHabitState(event){
-        const habit = Model.habits[event.target.parentElement.dataset.index];
-        
-        if(event.target.checked){
-            habit.markedDays[format(new Date(),DATE_AS_KEY_FORMAT)] = true;
+    function changeHabitState(habit,checked){
+        if(checked){
+            habit.markedDays[format(Model.selectedDate,DATE_AS_KEY_FORMAT)] = true;
         } else {
-            delete habit.markedDays[format(new Date(),DATE_AS_KEY_FORMAT)];
+            delete habit.markedDays[format(Model.selectedDate,DATE_AS_KEY_FORMAT)];
         }
 
         Model.saveToLocalStorage();
@@ -91,18 +89,6 @@ const DOMController = (function(){
         
         const dialog = new A11yDialog(dialogContainer);
         dialog.on('show',generateHabitDialog);
-    }
-
-    function onHabitFormSubmit(event){
-        event.preventDefault();
-        
-        let formData = new FormData(this);
-
-        const habit = baseHabitFactory(formData);
-        Model.habits.push(habit);
-        Model.saveToLocalStorage();
-
-        generateTodayHabits();
     }
 
     function generateTodayPage(){
@@ -180,12 +166,21 @@ const DOMController = (function(){
     
                 const checkbox = habitDiv.querySelector('input[type="checkbox"]');
 
-                checkbox.addEventListener('click',habitsController.changeHabitState);
+                checkbox.addEventListener('click',onHabitStateChange);
                 checkbox.checked = habit.markedDays[format(new Date(),DATE_AS_KEY_FORMAT)];
                 container.append(habitDiv);
             }
             
             index++;
+        });
+    }
+
+    function updateHabitCheckboxes(){
+        const habitDivs = document.querySelectorAll('.habitsList .habit');
+        habitDivs.forEach(habitDiv => {
+            const habit = Model.habits[habitDiv.dataset.index];
+            
+            habitDiv.querySelector('input[type="checkbox"]').checked = habit.markedDays[format(Model.selectedDate,DATE_AS_KEY_FORMAT)];
         });
     }
 
@@ -197,8 +192,27 @@ const DOMController = (function(){
         const currentSelection = document.querySelector(`.days-list [data-date="${format(Model.selectedDate,DATE_AS_KEY_FORMAT)}"]`);
         currentSelection.classList.add('selected');
 
-        console.log(Model.selectedDate);
+        updateHabitCheckboxes();
         setSelectedDate();
+    }
+
+    function onHabitFormSubmit(event){
+        event.preventDefault();
+        
+        let formData = new FormData(this);
+
+        const habit = baseHabitFactory(formData);
+        Model.habits.push(habit);
+        Model.saveToLocalStorage();
+
+        generateTodayHabits();
+    }
+
+    function onHabitStateChange(event){
+        const habit = Model.habits[event.target.parentElement.dataset.index];
+        const checked = event.target.checked;
+
+        habitsController.changeHabitState(habit,checked);
     }
 
     const habitGenerator = (function(){
