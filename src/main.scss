@@ -137,6 +137,7 @@ nav {
     flex-direction: column;
 
     width: 100%;
+    height: 90vh;
 
     header {
         width: 100%;
@@ -164,7 +165,6 @@ nav {
             }
         }
     }
-    
 
     .habit {
         display: flex;
@@ -175,6 +175,14 @@ nav {
         input[type="checkbox"] {
             width: 20px;
         }
+    }
+
+    .summary {
+        margin-top: auto;
+    }
+
+    .summary.selected {
+        background-color: rgba(220, 20, 60, 0.664);    
     }
 }
 

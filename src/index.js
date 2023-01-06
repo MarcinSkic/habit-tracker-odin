@@ -69,6 +69,10 @@ const DOMController = (function(){
         return template.content.childNodes;
     }
 
+    function connectToEvents(){
+        document.querySelector('.today-page .summary').addEventListener('click',onShowEveryHabit);
+    }
+
     function generateMobileHeader(){
         const header = document.querySelector('nav');
 
@@ -229,6 +233,14 @@ const DOMController = (function(){
         habitsController.changeHabitState(habit,checked);
     }
 
+    function onShowEveryHabit(event){
+        const btn = event.currentTarget;
+        btn.classList.toggle('selected');
+        Model.showEveryHabit = btn.classList.contains('selected');
+
+        generateTodayHabits();
+    }
+
     const habitGenerator = (function(){
 
         function generateDialogContent(type){
@@ -310,7 +322,9 @@ const DOMController = (function(){
         habitGenerator.generateDialogContent(event.currentTarget.value);
     }
 
-    return {generateMobileHeader,
+    return {
+        connectToEvents,
+        generateMobileHeader,
         generateTodayPage,
         generateTodayHabits,
         createHabitCreatorDialog,
@@ -319,6 +333,7 @@ const DOMController = (function(){
     };
 })();
 
+DOMController.connectToEvents();
 DOMController.generateMobileHeader();
 DOMController.createHabitPickerDialog();
 DOMController.createHabitCreatorDialog();
