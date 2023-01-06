@@ -1,7 +1,7 @@
 import A11yDialog from "a11y-dialog";
 import "normalize.css";
 import "./main.scss";
-import {parse,format,isToday,addDays,subDays} from "date-fns";
+import {set,parse,format,isToday,addDays,subDays, isAfter, isBefore} from "date-fns";
 
 const DATE_AS_KEY_FORMAT = "yyyyMMdd";
 const DAYS_TO_SHOW = 7;
@@ -44,6 +44,7 @@ const Model = (function() {
 
     let habits;
     let selectedDate = parse(format(new Date(),DATE_AS_KEY_FORMAT),DATE_AS_KEY_FORMAT,new Date());
+    let showEveryHabit = false;
 
     console.log(selectedDate);
 
@@ -151,10 +152,9 @@ const DOMController = (function(){
         container.innerHTML = "";
         let index = 0;
 
-        console.log("generatePage =",Model.habits);
         Model.habits.forEach(habit => {
 
-            if(true){
+            if(shouldHabitBeVisible(habit)){
                 const habitDiv = document.createElement('div');
                 habitDiv.classList.add("habit");
                 habitDiv.dataset.index = index;
@@ -167,12 +167,19 @@ const DOMController = (function(){
                 const checkbox = habitDiv.querySelector('input[type="checkbox"]');
 
                 checkbox.addEventListener('click',onHabitStateChange);
-                checkbox.checked = habit.markedDays[format(new Date(),DATE_AS_KEY_FORMAT)];
+                checkbox.checked = habit.markedDays[format(Model.selectedDate,DATE_AS_KEY_FORMAT)];
                 container.append(habitDiv);
             }
             
             index++;
         });
+    }
+
+    function shouldHabitBeVisible(habit){
+        const startTime = parse(habit.DOMdata.startShowHour,"HH:mm",new Date());
+        const endTime = parse(habit.DOMdata.endShowHour,"HH:mm",new Date());
+
+        return Model.showEveryHabit || !isToday(Model.selectedDate) || (!habit.markedDays[format(Model.selectedDate,DATE_AS_KEY_FORMAT)] && (isAfter(new Date(),startTime) && isBefore(new Date(), endTime)));
     }
 
     function updateHabitCheckboxes(){
@@ -192,7 +199,8 @@ const DOMController = (function(){
         const currentSelection = document.querySelector(`.days-list [data-date="${format(Model.selectedDate,DATE_AS_KEY_FORMAT)}"]`);
         currentSelection.classList.add('selected');
 
-        updateHabitCheckboxes();
+        generateTodayHabits();
+        //updateHabitCheckboxes();     
         setSelectedDate();
     }
 
@@ -211,6 +219,12 @@ const DOMController = (function(){
     function onHabitStateChange(event){
         const habit = Model.habits[event.target.parentElement.dataset.index];
         const checked = event.target.checked;
+
+        console.log(shouldHabitBeVisible(habit));
+        if(!shouldHabitBeVisible(habit)){
+            const habit = event.target.closest('.habit');
+            habit.remove();
+        }
 
         habitsController.changeHabitState(habit,checked);
     }
@@ -256,7 +270,7 @@ const DOMController = (function(){
                 <input type="time" name="startShowHour" id="startShowHour">
                 <label for="endShowHour">to</label>
                 <input type="time" name="endShowHour" id="endShowHour">
-                <input type="submit" name="submit" value="test">
+                <input type="submit" name="submit" value="Save">
             `
 
             form.addEventListener('submit',onHabitFormSubmit);
